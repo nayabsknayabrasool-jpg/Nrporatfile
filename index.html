@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f4f6f8;
+        }
+
+        header {
+            background: #1f2937;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Student Management System</h1>
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <h2>Add Student</h2>
+
+        <form id="studentForm">
+            <input type="text" id="name" placeholder="Student Name" required>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="number" id="age" placeholder="Age" required>
+            <input type="text" id="course" placeholder="Course" required>
+
+            <button type="submit">Add Student</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h2>Students</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th>Course</th>
+                </tr>
+            </thead>
+
+            <tbody id="studentTable">
+                <!-- Students will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    const form = document.getElementById("studentForm");
+    const table = document.getElementById("studentTable");
+
+    form.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const student = {
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            age: Number(document.getElementById("age").value),
+            course: document.getElementById("course").value
+        };
+
+        try {
+            const response = await fetch("/students", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(student)
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to add student");
+            }
+
+            alert("Student added successfully!");
+            form.reset();
+            loadStudents();
+
+        } catch (error) {
+            console.error(error);
+            alert("Backend is not connected yet.");
+        }
+    });
+
+    async function loadStudents() {
+        try {
+            const response = await fetch("/students");
+
+            if (!response.ok) {
+                throw new Error("Failed to load students");
+            }
+
+            const students = await response.json();
+
+            table.innerHTML = "";
+
+            students.forEach(student => {
+                const row = `
+                    <tr>
+                        <td>${student.id}</td>
+                        <td>${student.name}</td>
+                        <td>${student.email}</td>
+                        <td>${student.age}</td>
+                        <td>${student.course}</td>
+                    </tr>
+                `;
+
+                table.innerHTML += row;
+            });
+
+        } catch (error) {
+            console.log("Backend not available yet.");
+        }
+    }
+
+    loadStudents();
+</script>
+
+</body>
+</html>
